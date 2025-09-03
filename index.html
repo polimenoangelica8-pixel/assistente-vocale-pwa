@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistente Vocale WPA</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2196f3">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
+    #output { margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 10px; }
+    button { padding: 12px 20px; margin: 10px; font-size: 16px; border-radius: 8px; cursor: pointer; }
+    .listening { background-color: red; color: white; }
+  </style>
+</head>
+<body>
+  <h1>🎤 Assistente Vocale WPA</h1>
+  <button id="start">Parla</button>
+  <div id="output">Premi il microfono e fai una domanda...</div>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js").then(() => {
+    console.log("Service Worker registrato!");
+  });
+}
+
+const output = document.getElementById("output");
+const startBtn = document.getElementById("start");
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = "it-IT";
+recognition.continuous = false;
+
+function speak(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "it-IT";
+  speechSynthesis.speak(utterance);
+}
+
+async function askGPT(question) {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "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"
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: question }]
+    })
+  });
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+startBtn.addEventListener("click", () => {
+  recognition.start();
+  startBtn.classList.add("listening");
+  output.innerText = "🎤 Sto ascoltando...";
+});
+
+recognition.onresult = async (event) => {
+  const userText = event.results[0][0].transcript;
+  output.innerText = "👤 Hai detto: " + userText;
+  const risposta = await askGPT(userText);
+  output.innerHTML += "<br><br>🤖 Assistente: " + risposta;
+  speak(risposta);
+  startBtn.classList.remove("listening");
+};
+
+recognition.onerror = (e) => {
+  output.innerText = "Errore microfono: " + e.error;
+  startBtn.classList.remove("listening");
+};
+recognition.onend = () => startBtn.classList.remove("listening");
+</script>
+</body>
+</html>
