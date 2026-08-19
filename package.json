@@ -1,0 +1,21 @@
+{
+  "name": "assocaf-voice-agent",
+  "version": "1.0.0",
+  "description": "Agente vocale AI real-time per ASSOCAF - Bridge Twilio Media Streams <-> Deepgram Voice Agent",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  },
+  "keywords": ["twilio", "deepgram", "voice-agent", "websocket", "assocaf"],
+  "license": "MIT"
+}
